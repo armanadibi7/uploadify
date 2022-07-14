@@ -21,6 +21,7 @@ if($_POST){
     
     $fileToUpload = $folder_path . '/' . basename($_FILES["fileToUpload"]["name"]);
     $file_extention = pathinfo($fileToUpload, PATHINFO_EXTENSION);
+    $file_extention = strtolower($file_extention);
     if (file_exists($fileToUpload)) {
      $error= "File name exists already";
     }else if($_FILES["fileToUpload"]["size"] > 10148576) {

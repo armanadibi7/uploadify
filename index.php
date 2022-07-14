@@ -17,6 +17,14 @@ if( !empty($_SESSION['username'])){
     exit();
 }
 if($_POST){
+    if (isset($_SESSION['wrong_count'])) {
+        if($_SESSION['wrong_count'] == 0 || $_SESSION['wrong_count'] > 0  ){
+
+        }else{
+
+            $_SESSION['wrong_count'] = 0;
+        }
+      }
     $token = filter_input(INPUT_POST, 'token', FILTER_SANITIZE_STRING);
     if (!$token || $token !== $_SESSION['token']) {
        $error = "Please Try Again.";
@@ -34,10 +42,11 @@ if($_POST){
                 $sql = "SELECT username,password,status,email FROM user WHERE email='".$email."'";
                 $result = $conn->query($sql);
                 if ($result->num_rows > 0) {
-    
+                  
                     while ($row = $result->fetch_assoc()) {
+                        if($row['status'] == "active"){
                         if (password_verify($pwd, $row['password'])) {
-                            if($row['status'] == "active"){
+                           
                                 $_SESSION['username'] = $row['username'];
                                 
                                 $_SESSION['email'] = $row['email'];
@@ -45,15 +54,30 @@ if($_POST){
                                 
                                 header("Location: user_panel.php");
                                  exit();
-                            }else{
-                                
-                            $error = "Your account has been deactivated. Contact Customer Service please.";
-                            }
+                         
                         } else {
+                            $_SESSION['wrong_count']++;
+                            if($_SESSION['wrong_count'] > 2){
+                                
+                                $_SESSION['wrong_count']=0;
+                                $sql = "UPDATE user SET status='inactive' WHERE email='".$email."'";
+                                if ($conn->query($sql) === TRUE) {
+                                    $error= "Your account has been deactivated.";
+                                } else {
+                                    $error= "Error" . $conn->error;
+                                }
+                
+                                $conn->close();
+                            }
                             $error = "Wrong Email or Password, Try Again";
                         }
-                    }
+                    }else{
+                        $_SESSION['wrong_count']=0;       
+                        $error = "Your account has been deactivated. Contact Customer Service please.";
+                        }
+                    }   
                 }else{
+                    $_SESSION['wrong_count']=0;
                     $error = "Wrong Email or Password, Try Again";
                 }
                 

@@ -21,3 +21,6 @@ The website has the following feature.
   - Account Management
     - The user can change their account password.
   
+  - Logout
+  
+  
